@@ -8,6 +8,7 @@
 import SwiftUI
 
 class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a class; behave like an ObservableObject so it will publish changes
+    typealias Card = MemoryGame<String>.Card
     
     init(){
         currentTheme = themes.randomElement()!
@@ -15,7 +16,6 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
     }
  
     var currentTheme: Theme
-//    = emojiMemoryGameThemes.randomElement()!
     
     static func createMemoryGame(of theme: Theme) -> MemoryGame<String> {
         /*
@@ -46,10 +46,9 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
     ]
        
     @Published private var model: MemoryGame<String>
-//    = createMemoryGame(of: currentTheme)
     // private var means the View cannot see or change model, @Published so ViewModel will publish a change whenever model changes
     
-    var cards: Array<MemoryGame<String>.Card> {
+    var cards: Array<Card> {
         // as model is private, in order for View to access the cards in the game, we need to create a var that returns an array of cards
         model.cards // returns an array of cards in the MemoryGame
     }
@@ -59,7 +58,6 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
     }
     
     var colorOfCurrentTheme: Color? = nil
-//    let colorFromTheme: String = currentTheme.color
     
     func determineThemeColor (themeColor: String) -> Color {
         switch themeColor {
@@ -73,15 +71,13 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
         default: return Color.gray
         }
     }
-    
-//    var score: Int = MemoryGame<String>.score
-    
+        
     // MARK: - Intent(s)
         /* "Mark: -" creates a bookmark section in the top nav bar
          Here we will create a function that registers user intent. In memorygame, the only user intent is to choose a card, i.e. translate a tap gesture -> choosing a card
          */
     
-    func choose (_ card : MemoryGame<String>.Card) { // define external and internal label
+    func choose (_ card : Card) { // define external and internal label
         model.choose(card)
     }
     

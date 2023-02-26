@@ -10,22 +10,29 @@ import Foundation
 struct MemoryGame<CardContent> where CardContent: Equatable {
     private (set) var cards: Array<Card> // unset variable
     
-    private var indexOfTheOnlyFaceUpCard: Int? // keeps track of the index of the only face up card on the board
+    private var indexOfTheOnlyFaceUpCard: Int? {
+        get {
+            cards.indices.filter({cards[$0].isFaceUp}).oneAndOnly
+        }
+        set {
+            cards.indices.forEach({cards[$0].isFaceUp = ($0 == newValue)})
+        }
+    }
     
     private (set) var score: Int // keeps track of score
     
     mutating func choose(_ card: Card) { // use mutating to allow choose to change values created within the struct model
-        /*
-         Called when user touches a card
-         */
 
-        if let chosenIndex = cards.firstIndex(where: {$0.id == card.id}), !cards[chosenIndex].isFaceUp, !cards[chosenIndex].isMatched {
+        if let chosenIndex = cards.firstIndex(where: {$0.id == card.id}),
+            !cards[chosenIndex].isFaceUp,
+            !cards[chosenIndex].isMatched
+        {
             /*
              firstIndex is a function that's part of Array. It returns the first index of an element that satisfies the requirement: element.id == card.id
              */
             cards[chosenIndex].numberOfTimesSeen += 1
             if let potentialMatchIndex = indexOfTheOnlyFaceUpCard { // when there's already 1 (and only 1) card flipped on screen
-                if cards[chosenIndex].content == cards[potentialMatchIndex].content{ // check to see if there's a match
+                if cards[chosenIndex].content == cards[potentialMatchIndex].content { // check to see if there's a match
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
                     score += 2
@@ -34,20 +41,12 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 } else if cards[chosenIndex].numberOfTimesSeen > 1 || cards[potentialMatchIndex].numberOfTimesSeen > 1 {
                     score -= 1
                 }
-                indexOfTheOnlyFaceUpCard = nil // all cards face down
+                cards[chosenIndex].isFaceUp = true
             }
-            
             else {
-                for index in cards.indices{ // flip over all the cards
-                    cards[index].isFaceUp = false
-                }
                 indexOfTheOnlyFaceUpCard = chosenIndex
-//                cards[chosenIndex].isPreviouslySeen = true
             }
-//            print("number of times you've seen this card is \(cards[chosenIndex].numberOfTimesSeen)")
-            cards[chosenIndex].isFaceUp.toggle() // toggles the value of Bool from true <-> false
         }
-//        print("current score is \(score)")
     }
     
     init(numberOfPairOfCards: Int, emojiGameScore: Int, createCardContent: (Int) -> CardContent){
@@ -55,7 +54,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
          initialise unset variables (cards) within MemoryGame. now, whenever you call on MemoryGame, you can't / don't need to initialise the var cards. Instead, you pass the arguments of init whenever you call MemoryGame
         Inputs: int for numberOfPairOfCards & function that creates CardContent
          */
-        cards = Array<Card>() // create an empty array of cards
+        cards = [] // create an empty array of cards
         // add numberOfPairOfCards x 2 cards to card array
 
         for pairIndex in 0..<numberOfPairOfCards{
@@ -72,13 +71,22 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         score = emojiGameScore
     }
     
-    struct Card: Identifiable{
+    struct Card: Identifiable {
         // asking Card to behave like an Identifiable to use it in ForEach function
-        var isFaceUp: Bool = false
-        var isMatched: Bool = false
-        var numberOfTimesSeen: Int = 0
+        var isFaceUp = false
+        var isMatched = false
+        var numberOfTimesSeen = 0
         var content: CardContent
         var id: Int
     }
 }
 
+extension Array {
+    var oneAndOnly: Element? {
+        if count == 1 {
+            return first
+        } else {
+            return nil
+        }
+    }
+}
