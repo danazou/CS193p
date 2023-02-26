@@ -18,13 +18,11 @@ struct ContentView: View {
         let myScore = viewModel.currentScore
         
         VStack{
-            
             Spacer()
             HStack(alignment: .bottom){
                 Text("\(viewModel.currentTheme.name)")
                     .font(.title)
                     .fontWeight(.bold)
-                    .padding(.horizontal, 10.0)
                 
                 Spacer()
                 
@@ -32,19 +30,17 @@ struct ContentView: View {
                     .padding(.trailing, 10.0)
                     .padding(.bottom, 3.0)
             }
-            
+
             // Show emoji cards in the selected theme in grid format, each card is in 2:3 aspect ratio.
-            ScrollView{
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]){
-                    // We want View to display cards. Loop through the cards in viewModel
-                    ForEach(viewModel.cards) { card in // input of card because viewModel.cards is Array<Card>
-                        CardView(card: card)
-                            .aspectRatio(2/3, contentMode: .fit)
-                            .onTapGesture {
-                                // record user action and translate it to user intent
-                                viewModel.choose(card) // recall that we defined card in struct CardView
-                            }
-                    }
+            AspectVGrid (items: viewModel.cards, aspectRatio: 2/3) { card in
+                if card.isMatched && !card.isFaceUp {
+                    Rectangle().opacity(0)
+                } else {
+                    CardView(card: card)
+                        .padding(4)
+                        .onTapGesture {
+                            viewModel.choose(card) // recall that we defined card in struct CardView
+                        }
                 }
             }
             .foregroundColor(myColor)
@@ -57,38 +53,48 @@ struct ContentView: View {
         }
         .padding(.horizontal)
     }
+}
     
+struct CardView: View{
+    /* View that shows what a card looks like.
+     
+     Input: card as defined in the Model (note: we are only giving View a portion of the Model, only what is needed)
+     Output: body of type some View -> an UI that shows a card in the Model
+     
+     */
     
-    struct CardView: View{
-        /* View that shows what a card looks like.
-         
-         Input: card as defined in the Model (note: we are only giving View a portion of the Model, only what is needed)
-         Output: body of type some View -> an UI that shows a card in the Model
-         
-         */
-        
-        let card: MemoryGame<String>.Card // accessing information in the model to build Card view, read-only
-        
-        var body: some View{
+    let card: EmojiMemoryGame.Card // accessing information in the model to build Card view, read-only
+    
+    var body: some View {
+        GeometryReader{ geometry in
             ZStack {
-                let shape = RoundedRectangle(cornerRadius: 8)
+                let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
         
                 if card.isFaceUp {
                     // recall that isFaceUp is a var we defined in Model(MemoryGame)
                     shape.fill().foregroundColor(.white)
-                    shape.strokeBorder(lineWidth: 3)
-                    Text(card.content).font(.title)
+                    shape.strokeBorder(lineWidth: DrawingConstants.lineWidth)
+                    Text(card.content).font(font(in: geometry.size))
                 } else if card.isMatched{
                     shape.opacity(0) // still taking up space but not showing the card
-                    Text(" ").font(.title)
                 }
                 else {
                     shape.fill()
-                    Text(" ").font(.title)
                 }
             }
         }
     }
+    
+    private func font (in size: CGSize) -> Font {
+        Font.system(size: min(size.width, size.height) * DrawingConstants.fontScale)
+    }
+    
+    private struct DrawingConstants {
+        static let cornerRadius: CGFloat = 8
+        static let lineWidth: CGFloat = 3
+        static let fontScale: CGFloat = 0.6
+    }
+}
     
 
     
@@ -111,15 +117,15 @@ struct ContentView: View {
     
 // Configure XCode preview
     
-    struct ContentView_Previews: PreviewProvider {
-        static var previews: some View {
-            let game = EmojiMemoryGame()
-            ContentView(viewModel: game)
-                .preferredColorScheme(.light)
-            ContentView(viewModel: game)
-                .previewInterfaceOrientation(.portrait)
-                .preferredColorScheme(.dark)
-        }
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        let game = EmojiMemoryGame()
+        ContentView(viewModel: game)
+            .preferredColorScheme(.light)
+        ContentView(viewModel: game)
+            .previewInterfaceOrientation(.portrait)
+            .preferredColorScheme(.dark)
     }
-    
 }
+    
+
