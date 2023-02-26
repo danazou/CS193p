@@ -39,7 +39,7 @@ struct ContentView: View {
                     CardView(card: card)
                         .padding(4)
                         .onTapGesture {
-                            viewModel.choose(card) // recall that we defined card in struct CardView
+                            viewModel.choose(card)
                         }
                 }
             }
@@ -66,22 +66,15 @@ struct CardView: View{
     let card: EmojiMemoryGame.Card // accessing information in the model to build Card view, read-only
     
     var body: some View {
-        GeometryReader{ geometry in
+        GeometryReader { geometry in
             ZStack {
-                let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
-        
-                if card.isFaceUp {
-                    // recall that isFaceUp is a var we defined in Model(MemoryGame)
-                    shape.fill().foregroundColor(.white)
-                    shape.strokeBorder(lineWidth: DrawingConstants.lineWidth)
-                    Text(card.content).font(font(in: geometry.size))
-                } else if card.isMatched{
-                    shape.opacity(0) // still taking up space but not showing the card
-                }
-                else {
-                    shape.fill()
-                }
+                // need to add Pie from Lecture 6
+                Text(card.content)
+                    .rotationEffect(.degrees(card.isMatched ? 360 : 0))
+                    .animation(Animation.linear(duration: 0.8).repeatForever(autoreverses: false), value: card.isMatched)
+                    .font(font(in: geometry.size))
             }
+            .modifier(Cardify(isFaceUp: card.isFaceUp))
         }
     }
     
@@ -90,8 +83,6 @@ struct CardView: View{
     }
     
     private struct DrawingConstants {
-        static let cornerRadius: CGFloat = 8
-        static let lineWidth: CGFloat = 3
         static let fontScale: CGFloat = 0.6
     }
 }
