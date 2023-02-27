@@ -14,44 +14,67 @@ struct ContentView: View {
      We've decided to do the latter - every time ContentView is called, we need to define viewModel
      */
     var body: some View {
-        let myColor = viewModel.determineThemeColor(themeColor: viewModel.currentTheme.color)
-        let myScore = viewModel.currentScore
         
-        VStack{
-            Spacer()
-            HStack(alignment: .bottom){
-                Text("\(viewModel.currentTheme.name)")
-                    .font(.title)
-                    .fontWeight(.bold)
-                
+        VStack {
+            Spacer(minLength: 20)
+            header
+            gameBody
+            HStack {
+                shuffle
                 Spacer()
-                
-                Text("Score: \(myScore)")
-                    .padding(.trailing, 10.0)
-                    .padding(.bottom, 3.0)
+                newGame
             }
-
-            // Show emoji cards in the selected theme in grid format, each card is in 2:3 aspect ratio.
-            AspectVGrid (items: viewModel.cards, aspectRatio: 2/3) { card in
-                if card.isMatched && !card.isFaceUp {
-                    Rectangle().opacity(0)
-                } else {
-                    CardView(card: card)
-                        .padding(4)
-                        .onTapGesture {
-                            viewModel.choose(card)
-                        }
-                }
-            }
-            .foregroundColor(myColor)
+            .foregroundColor(.blue)
+            .padding(.horizontal, 50)
             
-            Text("New Game")
-                .font(.subheadline).foregroundColor(.blue)
-                .onTapGesture {
-                    viewModel.newGame()
-                }
         }
         .padding(.horizontal)
+    }
+    
+    var header: some View {
+        HStack(alignment: .bottom){
+            Text("\(viewModel.currentTheme.name)")
+                .font(.title).fontWeight(.bold)
+            
+            Spacer()
+            
+            Text("Score: \(viewModel.currentScore)")
+                .padding(.trailing, 10.0)
+                .padding(.bottom, 3.0)
+        }
+    }
+    
+    var gameBody: some View {
+        AspectVGrid (items: viewModel.cards, aspectRatio: 2/3) { card in
+            if card.isMatched && !card.isFaceUp {
+                Color.clear
+            } else {
+                CardView(card: card)
+                    .padding(4)
+                    .onTapGesture {
+                        withAnimation {
+                            viewModel.choose(card)
+                        }
+                    }
+            }
+        }
+        .foregroundColor(viewModel.determineThemeColor(themeColor: viewModel.currentTheme.color))
+    }
+    
+    var newGame: some View {
+        Text("New Game")
+//            .foregroundColor(.blue)
+            .onTapGesture {
+                viewModel.newGame()
+            }
+    }
+    
+    var shuffle: some View {
+        Text("Shuffle").onTapGesture {
+            withAnimation {
+                viewModel.shuffle()
+            }
+        }
     }
 }
     
@@ -74,7 +97,7 @@ struct CardView: View{
                     .animation(Animation.linear(duration: 0.8).repeatForever(autoreverses: false), value: card.isMatched)
                     .font(font(in: geometry.size))
             }
-            .modifier(Cardify(isFaceUp: card.isFaceUp))
+            .cardify(isFaceUp: card.isFaceUp)
         }
     }
     
