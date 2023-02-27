@@ -67,7 +67,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             cards.append(Card(content: content, id: pairIndex*2+1))
         }
         
-        cards = cards.shuffled()
+        cards.shuffle()
         score = emojiGameScore
     }
     
@@ -78,6 +78,10 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         var numberOfTimesSeen = 0
         var content: CardContent
         var id: Int
+    }
+    
+    mutating func shuffle() {
+        cards.shuffle()
     }
 }
 
