@@ -13,27 +13,33 @@ struct ContentView: View {
     /* the value of viewModel needs to be initialised. This can be done in 2 ways, initialise it directly in the same line or pass the value of viewModel each time ContentView is called.
      We've decided to do the latter - every time ContentView is called, we need to define viewModel
      */
+    
+    @Namespace private var dealingNamespace
+    
     var body: some View {
-        
-        VStack {
-            Spacer(minLength: 20)
-            header
-            gameBody
-            HStack {
-                shuffle
-                Spacer()
-                newGame
+        ZStack (alignment: .bottom) {
+            VStack {
+                Spacer(minLength: 20)
+                header
+                gameBody
+                HStack {
+                    shuffle
+                    Spacer()
+                    newGame
+                }
+                .foregroundColor(.blue)
+                .padding(.horizontal)
+                
             }
-            .foregroundColor(.blue)
-            .padding(.horizontal, 50)
-            
+            .padding(.horizontal)
+            deckBody
+                .padding(.bottom, 40.0)
         }
-        .padding(.horizontal)
     }
     
     var header: some View {
         HStack(alignment: .bottom){
-            Text("\(viewModel.currentTheme.name)")
+            Text("\(viewModel.theme.name)")
                 .font(.title).fontWeight(.bold)
             
             Spacer()
@@ -44,13 +50,38 @@ struct ContentView: View {
         }
     }
     
+    @State private var dealt = Set<Int>()
+    
+    func deal (_ card: EmojiMemoryGame.Card) {
+        dealt.insert(card.id)
+    }
+    
+    func isUndealt (_ card: EmojiMemoryGame.Card) -> Bool {
+        !dealt.contains(card.id)
+    }
+    
+    func dealAnimation (for card: EmojiMemoryGame.Card) -> Animation {
+        var delay = 0.0
+        if let index = viewModel.cards.firstIndex(where: {$0.id == card.id}) {
+            delay = Double(index) * (CardConstants.totalDealDuration / Double(viewModel.cards.count))
+        }
+        return Animation.easeInOut.delay(delay)
+    }
+    
+    func zIndex (_ card: EmojiMemoryGame.Card) -> Double {
+        -Double(viewModel.cards.firstIndex(where: {$0.id == card.id}) ?? 0)
+    }
+    
     var gameBody: some View {
-        AspectVGrid (items: viewModel.cards, aspectRatio: 2/3) { card in
-            if card.isMatched && !card.isFaceUp {
+        AspectVGrid (items: viewModel.cards, aspectRatio: CardConstants.aspectRatio) { card in
+            if isUndealt(card) || (card.isMatched && !card.isFaceUp) {
                 Color.clear
             } else {
                 CardView(card: card)
                     .padding(4)
+                    .zIndex(zIndex(card))
+                    .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+                    .transition(AnyTransition.asymmetric(insertion: .identity, removal: .scale).animation(.easeInOut))
                     .onTapGesture {
                         withAnimation {
                             viewModel.choose(card)
@@ -58,15 +89,44 @@ struct ContentView: View {
                     }
             }
         }
-        .foregroundColor(viewModel.determineThemeColor(themeColor: viewModel.currentTheme.color))
+        .foregroundColor(viewModel.determineThemeColor(themeColor: viewModel.theme.color))
+
+    }
+    
+    var deckBody: some View {
+        ZStack {
+            ForEach (viewModel.cards.filter(isUndealt)) { card in
+                CardView(card: card)
+                    .zIndex(zIndex(card))
+                    .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+                    .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
+            }
+        }
+        .foregroundColor(viewModel.determineThemeColor(themeColor: viewModel.theme.color))
+        .frame(width: CardConstants.deckWidth, height: CardConstants.deckHeight)
+        .onTapGesture {
+            for card in viewModel.cards {
+                withAnimation (dealAnimation(for: card)) {
+                    deal(card)
+                }
+            }
+        }
+    }
+    
+    private struct CardConstants {
+        static let aspectRatio: CGFloat = 2/3
+        static let deckHeight: CGFloat = 100
+        static let deckWidth = deckHeight * aspectRatio
+        static let totalDealDuration: Double = 0.5
     }
     
     var newGame: some View {
-        Text("New Game")
-//            .foregroundColor(.blue)
-            .onTapGesture {
+        Button("New Game") {
+            withAnimation {
+                dealt = []
                 viewModel.newGame()
             }
+        }
     }
     
     var shuffle: some View {

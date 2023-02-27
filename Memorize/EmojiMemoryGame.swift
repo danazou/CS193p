@@ -11,11 +11,11 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
     typealias Card = MemoryGame<String>.Card
     
     init(){
-        currentTheme = themes.randomElement()!
-        model = EmojiMemoryGame.createMemoryGame(of: currentTheme)
+        theme = themes.randomElement()!
+        model = EmojiMemoryGame.createMemoryGame(of: theme)
     }
  
-    var currentTheme: Theme
+    var theme: Theme
     
     static func createMemoryGame(of theme: Theme) -> MemoryGame<String> {
         /*
@@ -57,7 +57,7 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
         model.score
     }
     
-    var colorOfCurrentTheme: Color? = nil
+    var color: Color? = nil
     
     func determineThemeColor (themeColor: String) -> Color {
         switch themeColor {
@@ -82,9 +82,9 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
     }
     
     func newGame() {
-        currentTheme = themes.randomElement()!
-        colorOfCurrentTheme = determineThemeColor(themeColor: currentTheme.color)
-        model = EmojiMemoryGame.createMemoryGame(of: currentTheme)
+        theme = themes.randomElement()!
+        color = determineThemeColor(themeColor: theme.color)
+        model = EmojiMemoryGame.createMemoryGame(of: theme)
     }
     
     func shuffle() {
