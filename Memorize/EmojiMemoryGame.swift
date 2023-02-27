@@ -86,4 +86,8 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
         colorOfCurrentTheme = determineThemeColor(themeColor: currentTheme.color)
         model = EmojiMemoryGame.createMemoryGame(of: currentTheme)
     }
+    
+    func shuffle() {
+        model.shuffle()
+    }
 }
