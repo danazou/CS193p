@@ -89,7 +89,8 @@ struct ContentView: View {
                     }
             }
         }
-        .foregroundColor(viewModel.determineThemeColor(themeColor: viewModel.theme.color))
+        .foregroundStyle(viewModel.color ?? Gradient(colors: [.gray]))
+//        .foregroundColor(viewModel.determineThemeColor(themeColor: viewModel.theme.color))
 
     }
     
@@ -101,8 +102,9 @@ struct ContentView: View {
                     .matchedGeometryEffect(id: card.id, in: dealingNamespace)
                     .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
             }
-        }
-        .foregroundColor(viewModel.determineThemeColor(themeColor: viewModel.theme.color))
+        }.foregroundStyle(viewModel.color ?? Gradient(colors: [.gray]))
+        
+//        .foregroundColor(viewModel.determineThemeColor(themeColor: viewModel.theme.color))
         .frame(width: CardConstants.deckWidth, height: CardConstants.deckHeight)
         .onTapGesture {
             for card in viewModel.cards {

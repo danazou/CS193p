@@ -39,6 +39,7 @@ struct Cardify: AnimatableModifier {
     private struct DrawingConstants {
         static let cornerRadius: CGFloat = 8
         static let lineWidth: CGFloat = 3
+//        static let color: Gradient = EmojiMemoryGame().color
     }
 }
 

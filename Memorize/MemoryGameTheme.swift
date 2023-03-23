@@ -19,5 +19,20 @@ struct Theme{
         self.numberOfPairOfCards = numberOfPairOfCards
         self.color = color
     }
+      
+    // extra credit
+    init(name: String, emojis: Array<String>, color: String) {
+        self.name = name
+        self.emojis = emojis
+        self.numberOfPairOfCards = emojis.count
+        self.color = color
+    }
+    
+    init(name: String, emojis: Array<String>, numberOfPairOfCards: String, color: String) {
+        self.name = name
+        self.emojis = emojis
+        self.numberOfPairOfCards = Array(0..<(emojis.count < 10 ? emojis.count : 10)).randomElement()!
+        self.color = color
+    }
     
 }

@@ -13,6 +13,7 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
     init(){
         theme = themes.randomElement()!
         model = EmojiMemoryGame.createMemoryGame(of: theme)
+        color = determineThemeColor(themeColor: theme.color)
     }
  
     var theme: Theme
@@ -37,12 +38,13 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
     }
     
     private let themes: Array<Theme> = [
-        Theme(name: "Halloween", emojis: ["🎃", "👻", "🍬", "🏚️","🧛", "🦇", "🧟", "🕸️", "🕷️" ], numberOfPairOfCards: 4, color: "orange"),
-        Theme(name: "Gardening", emojis: ["🪴", "🍁", "🍄", "🥬", "🌽", "🫑", "🍠", "🌾", "🌻", "🌱", "🧑‍🌾", "🍅", "🥕", "🥦"], numberOfPairOfCards: 7, color: "green"),
-        Theme(name: "Animals", emojis: ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐻‍❄️", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🦅", "🦉", "🐙", "🐳", "🐁"], numberOfPairOfCards: 5, color: "pink"),
+        Theme(name: "Halloween", emojis: ["🎃", "👻", "🍬", "🏚️","🧛", "🦇", "🧟", "🕸️", "🕷️" ], numberOfPairOfCards: 4, color: "gradient-orange"),
+        Theme(name: "Gardening", emojis: ["🪴", "🍁", "🍄", "🥬", "🌽", "🫑", "🍠", "🌾", "🌻", "🌱", "🧑‍🌾", "🍅", "🥕", "🥦"], numberOfPairOfCards: 7, color: "gradient-green"),
+        Theme(name: "Animals", emojis: ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐻‍❄️", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🦅", "🦉", "🐙", "🐳", "🐁"], numberOfPairOfCards: "random", color: "pink"),
         Theme(name: "Weather", emojis: ["🌞", "🌝", "🌤", "⛅️", "🌥", "☁️", "🌦", "🌧", "⛈", "🌩", "🌨", "☃️", "🌬", "☔️", "🌫", "❄️", "🌪", "⚡️", "🌚", "🌙", "🌛", "🌜", "🌑", "🌕"], numberOfPairOfCards: 8, color: "yellow"),
         Theme(name: "Fruits", emojis: ["🍒","🍓", "🍇", "🍎", "🍉", "🍑", "🍊", "🍋", "🍌", "🍏", "🍈", "🍐", "🥝", "🥭", "🥥", "🫐"], numberOfPairOfCards: 6, color: "lime"),
-        Theme(name: "Food", emojis: ["🥘", "🍲", "🍛", "🍜", "🍤", "🥟", "🍦", "🥞", "🍪", "🥨", "🥮", "🍢", "🥐", "🫕", "🫔", "🦪", "🍙", "🍘", "🥪", "🥧"], numberOfPairOfCards: 3, color: "purple")
+        Theme(name: "Food", emojis: ["🥘", "🍲", "🍛", "🍜", "🍤", "🥟", "🍦", "🥞", "🍪", "🥨", "🥮", "🍢", "🥐", "🫕", "🫔", "🦪", "🍙", "🍘", "🥪", "🥧"], numberOfPairOfCards: 3, color: "purple"),
+        Theme(name: "Sport", emojis: ["🤽", "🏋️‍♂️", "⛹️‍♂️", "⛷️", "🤺", "🧗‍♀️", "🚣"], color: "blue")
     ]
        
     @Published private var model: MemoryGame<String>
@@ -57,21 +59,37 @@ class EmojiMemoryGame: ObservableObject{ // our ViewModel, which is always a cla
         model.score
     }
     
-    var color: Color? = nil
+    var color: Gradient?
     
-    func determineThemeColor (themeColor: String) -> Color {
+//    func determineThemeColor (themeColor: String) -> Color {
+//        switch themeColor {
+//        case "orange": return Color.orange
+//        case "blue": return Color.blue
+//        case "green": return Color.green
+//        case "pink": return Color.pink
+//        case "yellow": return Color.yellow
+//        case "purple": return Color.purple
+//        case "lime": return Color(red: 138/255, green: 229/255, blue: 118/255)
+//        default: return Color.gray
+//        }
+//    }
+  
+    func determineThemeColor (themeColor: String) -> Gradient {
         switch themeColor {
-        case "orange": return Color.orange
-        case "blue": return Color.blue
-        case "green": return Color.green
-        case "pink": return Color.pink
-        case "yellow": return Color.yellow
-        case "purple": return Color.purple
-        case "lime": return Color(red: 138/255, green: 229/255, blue: 118/255)
-        default: return Color.gray
+        case "orange": return Gradient(colors: [.orange])
+        case "blue": return Gradient(colors: [.blue])
+        case "green": return Gradient(colors: [.green])
+        case "pink": return Gradient(colors: [.pink])
+        case "yellow": return Gradient(colors: [.yellow])
+        case "purple": return Gradient(colors: [.purple])
+        case "lime": return Gradient(colors: [Color(red: 138/255, green: 229/255, blue: 118/255)])
+        case "gradient": return Gradient(colors: [.blue, .purple])
+        case "gradient-orange": return Gradient(colors: [.orange,.yellow])
+        case "gradient-green": return Gradient(colors: [.green, .mint])
+        default: return Gradient(colors: [.gray])
         }
     }
-        
+
     // MARK: - Intent(s)
         /* "Mark: -" creates a bookmark section in the top nav bar
          Here we will create a function that registers user intent. In memorygame, the only user intent is to choose a card, i.e. translate a tap gesture -> choosing a card
