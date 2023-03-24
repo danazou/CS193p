@@ -21,30 +21,52 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     
     private (set) var score: Int // keeps track of score
     
+    private var dateOfTheOnlyFaceUpCard: Date = Date()
+    
     mutating func choose(_ card: Card) { // use mutating to allow choose to change values created within the struct model
 
+        // index of the chosen card, only if it isn't faceUp and it isn't Matched
         if let chosenIndex = cards.firstIndex(where: {$0.id == card.id}),
             !cards[chosenIndex].isFaceUp,
             !cards[chosenIndex].isMatched
         {
-            /*
-             firstIndex is a function that's part of Array. It returns the first index of an element that satisfies the requirement: element.id == card.id
-             */
             cards[chosenIndex].numberOfTimesSeen += 1
-            if let potentialMatchIndex = indexOfTheOnlyFaceUpCard { // when there's already 1 (and only 1) card flipped on screen
-                if cards[chosenIndex].content == cards[potentialMatchIndex].content { // check to see if there's a match
+            
+            // when there's already 1 (and only 1) card flipped on screen
+            if let potentialMatchIndex = indexOfTheOnlyFaceUpCard {
+                
+                let timeSinceSelection = abs(dateOfTheOnlyFaceUpCard.timeIntervalSinceNow)
+                let boost = Int(max(3-timeSinceSelection, 0))
+                
+                // match
+                if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
-                    score += 2
-                } else if cards[chosenIndex].numberOfTimesSeen > 1 && cards[potentialMatchIndex].numberOfTimesSeen > 1{
-                    score -= 2
-                } else if cards[chosenIndex].numberOfTimesSeen > 1 || cards[potentialMatchIndex].numberOfTimesSeen > 1 {
-                    score -= 1
+                    score += (2 + boost)
                 }
+                
+                // no match
+                else {
+                    // penalty
+                    if cards[chosenIndex].numberOfTimesSeen > 1 || cards[potentialMatchIndex].numberOfTimesSeen > 1 {
+                        score -= boost
+                        
+                        if cards[chosenIndex].numberOfTimesSeen > 1 {
+                            score -= 1
+                        }
+                        
+                        if cards[potentialMatchIndex].numberOfTimesSeen > 1 {
+                            score -= 1
+                        }
+                    }
+                }
+                
                 cards[chosenIndex].isFaceUp = true
             }
+            
             else {
                 indexOfTheOnlyFaceUpCard = chosenIndex
+                dateOfTheOnlyFaceUpCard = Date()
             }
         }
     }
